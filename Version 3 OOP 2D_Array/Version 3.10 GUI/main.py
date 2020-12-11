@@ -257,7 +257,8 @@ class Animal():
         # An idea I had to maybe shorten this code down was using maths to caclulate the angle to move at between points.
         # This wouldn't really solve the problem of reusing lines of code with the only different being cords.
 
-
+        # This could easily be made into a function but its Lazy Code
+        
         # UPS  
         if Fy != 9999999 and Fy > Oy and Fx < Ox or randomBool == True and randomInt == 0:
             try:
@@ -450,6 +451,7 @@ class Rabbit(Animal):  # RABBIT_CLASS            This class inherits the Animal 
 class Fox(Animal):
 
     # Eating rabbits requires a bit of extra logic to remove the rabbit from the Entity List unlike
+    # When the rabbits position is taken, it will loop through every rabbit until a rabbit has the same XY, it will then consume the rabbit.
     def EatRabbit(self):
         global Rabbit_Popu
         global Entity_Dict
@@ -505,10 +507,17 @@ class Fox(Animal):
             else:
                 Animal.MoveRandomly(self)
         
-        # wait
+        # wait / do nothing
         if self.Entity_State == 2:
             pass
+        
+        
 
+# This is VERY messy, and quite bad. The variables names are also horrible. 
+# This is bad code.
+# This basically handles the generation and birth of rabbits
+# A lot of code is being reused and could be cleaned up into a function.
+# Like a said, very bad code. I mean it works.
 def GenerateRabbit(birth=False, randomSpawn=True, xPos=0, yPos=0, givenFood=0):
     global ScreenWidthX
     global ScreenHeightY
@@ -519,7 +528,7 @@ def GenerateRabbit(birth=False, randomSpawn=True, xPos=0, yPos=0, givenFood=0):
     EyeSight_Range = 4
     Entity_State = 0
 
-    def RabBirth(randomRabb):
+    def RabBirth(randomRabb): # This is the birth function
         global Rabbit_Popu
         given_xPos = xPos
         given_yPos = yPos
@@ -547,7 +556,7 @@ def GenerateRabbit(birth=False, randomSpawn=True, xPos=0, yPos=0, givenFood=0):
                 yyy = possibleLocations[randomSpawn][1]
                 stop += 1
 
-    if randomSpawn == True and birth == False: # Random spawn
+    if randomSpawn == True and birth == False: # This will spawn the rabbit randomly along the map
         while True:
             r_Xpos = random.randint(0, ScreenWidthX - 1)
             r_Ypos = random.randint(0, ScreenHeightY - 1)
@@ -570,7 +579,7 @@ def GenerateRabbit(birth=False, randomSpawn=True, xPos=0, yPos=0, givenFood=0):
         for _ in range(randomRabb):
             RabBirth(randomRabb)
         
-
+# This is basically a repeat of the GenerateRabbit function just made for Fox's
 def GenerateFox(birth=False, randomSpawn=True, xPos=0, yPos=0, givenFood=0):
     global ScreenWidthX
     global ScreenHeightY
@@ -632,6 +641,10 @@ def GenerateFox(birth=False, randomSpawn=True, xPos=0, yPos=0, givenFood=0):
         for _ in range(randintFox):
             FoxBirth(randintFox)
 
+            
+            
+# This is what actually spawns food around the map each turn.
+# It is usually a randomly generated location
 def GenerateFood():
     global ScreenWidthX
     global ScreenHeightY
@@ -650,6 +663,8 @@ def GenerateFood():
             break
     return
 
+
+# The UpdateEcosystem function is looped every turn. It handles each creature and calls its Class Update function
 def UpdateEcosystem():
     global Entity_Dict
     
@@ -663,6 +678,7 @@ def UpdateEcosystem():
             Entity.FoxUpdate()
     return
 
+# This is called at the start of the simulation to generate the ecosystem with the input variables
 def GenerateEcoSystem(Num_of_Food=2, Num_of_Rabbits=1, Num_of_Foxes=0):
     global ScreenArea
     global Entity_Dict
@@ -681,6 +697,7 @@ def GenerateEcoSystem(Num_of_Food=2, Num_of_Rabbits=1, Num_of_Foxes=0):
     print("Ecosystem Generated")
     return
 
+# Self explanitory
 def GenerateChart():
     line_chart = pygal.Line()
     line_chart.title = 'Rabbit Population'
@@ -691,6 +708,8 @@ def GenerateChart():
 
 
 #    Main update function, this is what basically loops through everything.
+#    Originally it was outside of a function but because of the use of tkinter it was put into a function.
+#    This resulted in having to put all the global variables inside.
 def MainUpdate(): # foodGui, rabbitsGui, foxGui, xWidth, yHeight
     global ScreenWidthX
     global ScreenHeightY
@@ -746,7 +765,7 @@ def MainUpdate(): # foodGui, rabbitsGui, foxGui, xWidth, yHeight
 
     
 
-    while True:
+    while True:# THIS is the main loop for the game.
 
         # A tiny bit of logic to keep food spawns somewhat okay.
         FoodGenerationRate = round(math.sqrt(ScreenArea) / 5)
@@ -777,7 +796,8 @@ def MainUpdate(): # foodGui, rabbitsGui, foxGui, xWidth, yHeight
             itterCount = 0
 
 
-# Tkinter 
+# Tkinter
+# Setting up Tkinter
 root = tk.Tk()
 root.title("Ecosystem Input")
 root.resizable(False, False)
@@ -786,13 +806,13 @@ canvas = tk.Canvas(root, height=350, width=350, bg="#0C1A15")
 canvas.config(highlightbackground="#0E583E")
 canvas.pack(side = 'top')
 
+# Declaring variables
 var_X = DoubleVar()
 var_Y = DoubleVar()
 var_Rab = DoubleVar()
 var_Food = DoubleVar()
 var_Fox = DoubleVar()
 
-#varTest = int(var_Y.get()) * int(var_X.get())
 
 #  XSlider
 X = tk.Label(root, text='X Width', bg="#0E583E")
@@ -832,7 +852,6 @@ canvas.create_window(262.5, 192-15, window=Fox_Tk)
 #Growth Rate
 
 GrowthMultipler = DoubleVar()
-
 Growth_Tk = tk.Label(root, text='Food Growth Rate', bg="#0E583E")
 Growth_Tk.config(font=('helvetica', 8))
 Growth_Slider = Scale(from_=1, to=10, variable = GrowthMultipler, orient=HORIZONTAL, bg="#0E583E")
