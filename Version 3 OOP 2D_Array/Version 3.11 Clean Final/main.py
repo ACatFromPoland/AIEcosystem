@@ -258,6 +258,15 @@ class Animal():
 
     # Walk to function
     # This function is quite problematic as we have a if statement to check which way to move the creature.
+    
+    def MoveUpon(self, given_X, given_Y, dir_X, dir_Y):
+        global Map2DArray
+        if Animal.CheckIfOutBounds(self, given_X + dir_X, given_Y + dir_Y) == False:
+            Map2DArray[given_X][given_Y] = 0
+            Map2DArray[given_X + dir_X][given_Y + dir_Y] = self.creatureType
+            self.xPos += dir_X
+            self.yPos += dir_Y
+    
     def WalkTo(self, WalkToPos, randomBool=False, randomInt=0):
         global Map2DArray
         Fx = WalkToPos[0]
@@ -266,67 +275,42 @@ class Animal():
         Oy = self.yPos
 
         # Too lazy and getting close to deadline so this is good enough for finding out which way the animal moves.
+        # Think of "9999999" as NULL
         try:
             # Ups
             if Fy != 9999999 and Fy > Oy and Fx < Ox or randomBool == True and randomInt == 0:
-                if Animal.CheckIfOutBounds(self, Ox - 1, Oy + 1) == False:   
-                    Map2DArray[Ox][Oy] = 0                              
-                    Map2DArray[Ox - 1][Oy + 1] = self.creatureType        
-                    self.xPos -= 1                                        
-                    self.yPos += 1   
+                Animal.MoveUpon(self, Ox, Oy, -1, 1)
+  
             elif Fy != 9999999 and  Fy > Oy and Fx == Ox or randomBool == True and randomInt == 1:
-                if Animal.CheckIfOutBounds(self, Ox, Oy + 1) == False:
-                    Map2DArray[Ox][Oy] = 0
-                    Map2DArray[Ox][Oy + 1] = self.creatureType
-                    self.yPos += 1
+                Animal.MoveUpon(self, Ox, Oy, 0, 1)
 
             elif Fy != 9999999 and  Fy > Oy and Fx > Ox or randomBool == True and randomInt == 2:
-                if Animal.CheckIfOutBounds(self, Ox + 1, Oy + 1) == False:
-                    Map2DArray[Ox][Oy] = 0
-                    Map2DArray[Ox + 1][Oy + 1] = self.creatureType
-                    self.xPos += 1
-                    self.yPos += 1
-
+                Animal.MoveUpon(self, Ox, Oy, 1, 1)
+                
             # Middles
             elif Fy != 9999999 and  Fy == Oy and Fx < Ox or randomBool == True and randomInt == 3:
-                if Animal.CheckIfOutBounds(self, Ox - 1, Oy) == False:
-                    Map2DArray[Ox][Oy] = 0
-                    Map2DArray[Ox - 1][Oy]  = self.creatureType
-                    self.xPos -= 1
+                Animal.MoveUpon(self, Ox, Oy, -1, 0)
 
             elif Fy != 9999999 and  Fy == Oy and Fx > Ox or randomBool == True and randomInt == 4:
-                if Animal.CheckIfOutBounds(self, Ox + 1, Oy) == False:
-                    Map2DArray[Ox][Oy] = 0
-                    Map2DArray[Ox + 1][Oy] = self.creatureType
-                    self.xPos += 1
+                Animal.MoveUpon(self, Ox, Oy, 1, 0)
 
             # Downs
             elif Fy != 9999999 and  Fy < Oy and Fx < Ox or randomBool == True and randomInt == 5:
-                if Animal.CheckIfOutBounds(self, Ox - 1, Oy - 1) == False:
-                    Map2DArray[Ox][Oy] = 0
-                    Map2DArray[Ox - 1][Oy - 1] = self.creatureType
-                    self.xPos -= 1
-                    self.yPos -= 1
+                Animal.MoveUpon(self, Ox, Oy, -1, -1)
 
             elif Fy != 9999999 and  Fy < Oy and Fx == Ox or randomBool == True and randomInt == 6:
-                if Animal.CheckIfOutBounds(self, Ox, Oy - 1) == False:
-                    Map2DArray[Ox][Oy] = 0
-                    Map2DArray[Ox][Oy - 1] = self.creatureType
-                    self.yPos -= 1
+                Animal.MoveUpon(self, Ox, Oy, 0, -1)
 
             elif Fy != 9999999 and  Fy < Oy and Fx > Ox or randomBool == True and randomInt == 7:
-                if Animal.CheckIfOutBounds(self, Ox + 1, Oy - 1) == False:
-                    Map2DArray[Ox][Oy] = 0
-                    Map2DArray[Ox + 1][Oy - 1] = self.creatureType
-                    self.xPos += 1
-                    self.yPos -= 1
-            
+                Animal.MoveUpon(self, Ox, Oy, 1, -1)
 
+            # Directly Ontop
             if Fy != 9999999 and  Fy == self.yPos and Fx == self.xPos:
                 if self.creatureType == 2:
                     self.Total_Food += 5
                 else:
                     Fox.EatRabbit(self)
+
         except:
             print("Animal can't move!")
             pass
@@ -378,7 +362,7 @@ class Rabbit(Animal):  # RABBIT_CLASS            This class inherits the Animal 
                     self.Entity_State = 0
                     foodGiven = 20
                     self.Total_Food = self.Total_Food - foodGiven
-                    GenerateRabbit(True ,False, self.xPos, self.yPos, foodGiven)
+                    GenerateAnimal(0, True ,False, self.xPos, self.yPos, foodGiven)
                 else:
                     Animal.WalkTo(self, MatePos)
             else:
@@ -443,7 +427,7 @@ class Fox(Animal):
                     self.Entity_State = 0
                     foodGiven = 20
                     self.Total_Food = self.Total_Food - foodGiven
-                    GenerateFox(True ,False, self.xPos, self.yPos, foodGiven)
+                    GenerateAnimal(1, True ,False, self.xPos, self.yPos, foodGiven)
                 else:
                     Animal.WalkTo(self, MatePos)
             else:
@@ -453,137 +437,94 @@ class Fox(Animal):
         if self.Entity_State == 2:
             pass
         
-        
-
-# This is VERY messy, and quite bad. The variables names are also horrible. 
-# This is bad code.
-# This basically handles the generation and birth of rabbits
-# A lot of code is being reused and could be cleaned up into a function.
-# Like a said, very bad code. I mean atlesat it works.
-def GenerateRabbit(birth=False, randomSpawn=True, xPos=0, yPos=0, givenFood=0):
+# I had to clean it up a bit like can you blame me...
+def GenerateAnimal(animalType=99, birth=False, randomSpawn=True, given_X=0, given_Y=0, givenFood=0):
     global ScreenWidthX
     global ScreenHeightY
     global Map2DArray
     global Rabbit_Popu
-    creatureType = 2
-    Total_Food = 50
-    EyeSight_Range = 4
-    Entity_State = 0
+    global Fox_Popu
+    Animal_info = [
+        [2,50,4,0],
+        [3,50,7,0]
+    ]
+    if animalType == 99:
+        print("Error GenerateAnimal : AnimalType not set.")
+        return
+    creatureType = Animal_info[animalType][0]
+    Total_Food = Animal_info[animalType][1]
+    EyeSight_Range = Animal_info[animalType][2]
+    Entity_State = Animal_info[animalType][3]
 
-    def RabBirth(randomRabb): # This is the birth function
+    def NaturalBirth(foodGiven):
         global Rabbit_Popu
-        given_xPos = xPos
-        given_yPos = yPos
-        possibleLocations = [(given_xPos - 1,given_yPos - 1),(given_xPos,given_yPos - 1),(given_xPos + 1,given_yPos - 1),(given_xPos - 1,given_yPos),(given_xPos + 1,given_yPos),(given_xPos - 1,given_yPos + 1),(given_xPos,given_yPos + 1),(given_xPos + 1,given_yPos + 1)]
-        randomSpawn = random.randint(0, len(possibleLocations) - 1)
-        xxx = possibleLocations[randomSpawn][0]
-        yyy = possibleLocations[randomSpawn][1]
-        stop = 0
+        global Fox_Popu
+        possibleLocations = [
+            (given_X - 1 , given_Y - 1),
+            (given_X     , given_Y - 1),
+            (given_X + 1 , given_Y - 1),
+            (given_X - 1 , given_Y),
+            (given_X + 1 , given_Y),
+            (given_X - 1 , given_Y + 1),
+            (given_X     , given_Y + 1),
+            (given_X + 1 , given_Y + 1)
+        ]
+        stop = -1
+        def PickRandom():
+            randomSpawnLocation = random.randint(0 , len(possibleLocations) - 1)
+            return possibleLocations[randomSpawnLocation][0], possibleLocations[randomSpawnLocation][1]
+
+        random_X, random_Y = PickRandom()
         while True:
             if stop > 8:
                 return
             try:
-                if Map2DArray[xxx][yyy] == 0:
-                    Entity_Dict.append(Rabbit(xxx, yyy, givenFood/randomRabb, creatureType, EyeSight_Range, Entity_State)) # This line is what creates the instance of the Rabbit class and adds it to the Entity_Dict.
-                    Rabbit_Popu = Rabbit_Popu + 1
-                    return
+                if Map2DArray[random_X][random_Y] == 0:
+                    if animalType == 0:
+                        Entity_Dict.append(Rabbit(random_X, random_Y, foodGiven, creatureType, EyeSight_Range, Entity_State))
+                        Rabbit_Popu = Rabbit_Popu + 1
+                        return
+                    elif animalType == 1:
+                        Entity_Dict.append(Fox(random_X, random_Y, foodGiven, creatureType, EyeSight_Range, Entity_State)) # This line is what creates the instance of the Fox class and adds it to the Entity_Dict.
+                        Fox_Popu = Fox_Popu + 1
+                        return
                 else:
-                    randomSpawn = random.randint(0, len(possibleLocations) - 1)
-                    xxx = possibleLocations[randomSpawn][0]
-                    yyy = possibleLocations[randomSpawn][1]
+                    random_X, random_Y = PickRandom()
                     stop += 1
+
             except:
-                randomSpawn = random.randint(0, len(possibleLocations) - 1)
-                xxx = possibleLocations[randomSpawn][0]
-                yyy = possibleLocations[randomSpawn][1]
+                random_X, random_Y = PickRandom()
                 stop += 1
 
-    if randomSpawn == True and birth == False: # This will spawn the rabbit randomly along the map
+    if randomSpawn == True and birth == False:
         while True:
-            r_Xpos = random.randint(0, ScreenWidthX - 1)
-            r_Ypos = random.randint(0, ScreenHeightY - 1)
-            if Map2DArray[r_Xpos][r_Ypos] == 0:
-                Entity_Dict.append(Rabbit(r_Xpos, r_Ypos, Total_Food, creatureType, EyeSight_Range, Entity_State))
-                Rabbit_Popu = Rabbit_Popu + 1
-                break
-        return
+            random_X = random.randint(0, ScreenWidthX - 1)
+            random_Y = random.randint(0, ScreenHeightY - 1)
+            if Map2DArray[random_X][random_Y] == 0:
+                if animalType == 0:
+                    Entity_Dict.append(Rabbit(random_X, random_Y, Total_Food, creatureType, EyeSight_Range, Entity_State))
+                    Rabbit_Popu = Rabbit_Popu + 1
+                    break
+                elif animalType == 1:
+                    Entity_Dict.append(Fox(random_X, random_Y, Total_Food, creatureType, EyeSight_Range, Entity_State)) # This line is what creates the instance of the Fox class and adds it to the Entity_Dict.
+                    Fox_Popu = Fox_Popu + 1
+                    break
 
     elif randomSpawn == False and birth == False: # None Random spawn (Mainly for tests)
-        given_xPos = xPos
-        given_yPos = yPos
-        if Map2DArray[given_xPos][given_yPos] == 0:
-            Entity_Dict.append(Rabbit(given_xPos, given_yPos, Total_Food, creatureType, EyeSight_Range, Entity_State))
-            Rabbit_Popu = Rabbit_Popu + 1
-            return
-
-    elif randomSpawn == False and birth == True: # Spawn by birth
-        randomRabb = random.randint(1, 14)
-        for _ in range(randomRabb):
-            RabBirth(randomRabb)
-        
-# This is basically a repeat of the GenerateRabbit function just made for Fox's
-def GenerateFox(birth=False, randomSpawn=True, xPos=0, yPos=0, givenFood=0):
-    global ScreenWidthX
-    global ScreenHeightY
-    global Map2DArray
-    global Fox_Popu
-    creatureType = 3
-    Total_Food = 50
-    EyeSight_Range = 7
-    Entity_State = 0
-
-    def FoxBirth(randintFox):
-        global Fox_Popu
-        given_xPos = xPos
-        given_yPos = yPos
-        possibleLocations = [(given_xPos - 1,given_yPos - 1),(given_xPos,given_yPos - 1),(given_xPos + 1,given_yPos - 1),(given_xPos - 1,given_yPos),(given_xPos + 1,given_yPos),(given_xPos - 1,given_yPos + 1),(given_xPos,given_yPos + 1),(given_xPos + 1,given_yPos + 1)]
-        randomSpawn = random.randint(0, len(possibleLocations) - 1)
-        xxx = possibleLocations[randomSpawn][0]
-        yyy = possibleLocations[randomSpawn][1]
-        stop = 0
-        while True:
-            if stop > 8:
+        if Map2DArray[given_X][given_Y] == 0:
+            if animalType == 0:
+                Entity_Dict.append(Rabbit(given_X, given_Y, Total_Food, creatureType, EyeSight_Range, Entity_State))
+                Rabbit_Popu = Rabbit_Popu + 1
                 return
-            try:
-                if Map2DArray[xxx][yyy] == 0:
-                    Entity_Dict.append(Fox(xxx, yyy, givenFood/randintFox, creatureType, EyeSight_Range, Entity_State))
-                    Fox_Popu = Fox_Popu + 1
-                    return
-                else:
-                    randomSpawn = random.randint(0, len(possibleLocations) - 1)
-                    xxx = possibleLocations[randomSpawn][0]
-                    yyy = possibleLocations[randomSpawn][1]
-                    stop += 1
-            except:
-                randomSpawn = random.randint(0, len(possibleLocations) - 1)
-                xxx = possibleLocations[randomSpawn][0]
-                yyy = possibleLocations[randomSpawn][1]
-                stop += 1
-
-    if randomSpawn == True and birth == False: # Random spawn
-        while True:
-            r_Xpos = random.randint(0, ScreenWidthX - 1)
-            r_Ypos = random.randint(0, ScreenHeightY - 1)
-            if Map2DArray[r_Xpos][r_Ypos] == 0:
-                Entity_Dict.append(Fox(r_Xpos, r_Ypos, Total_Food, creatureType, EyeSight_Range, Entity_State)) # This line is what creates the instance of the Fox class and adds it to the Entity_Dict.
+            elif animalType == 1:
+                Entity_Dict.append(Fox(given_X, given_Y, Total_Food, creatureType, EyeSight_Range, Entity_State))
                 Fox_Popu = Fox_Popu + 1
-                break
-        return
-
-    elif randomSpawn == False and birth == False: # User defined spawn (MAINLY FOR TESTING)
-        given_xPos = xPos
-        given_yPos = yPos
-        if Map2DArray[given_xPos][given_yPos] == 0:
-            Entity_Dict.append(Fox(given_xPos, given_yPos, Total_Food, creatureType, EyeSight_Range, Entity_State))
-            Fox_Popu = Fox_Popu + 1
-            return
-
-    elif randomSpawn == False and birth == True: # Spawn by birth
-        randintFox = random.randint(2,5)
-        for _ in range(randintFox):
-            FoxBirth(randintFox)
-
-            
+                return
+    
+    elif randomSpawn == False and birth == True:
+        AnimalAmount = random.randint(1, 14)
+        for _ in range(AnimalAmount):
+            NaturalBirth(givenFood / AnimalAmount)
             
 # This is what actually spawns food around the map each turn.
 # It is usually a randomly generated location
@@ -628,10 +569,10 @@ def GenerateEcoSystem(Num_of_Food=2, Num_of_Rabbits=1, Num_of_Foxes=0):
         GenerateFood()
     
     for _ in range(Num_of_Rabbits):
-        GenerateRabbit(False,True)
+        GenerateAnimal(0,False,True)
     
     for _ in range(Num_of_Foxes):
-        GenerateFox(False, True)
+        GenerateAnimal(1,False, True)
 
     for Entity in Entity_Dict:
         Entity.UpdatePos()
